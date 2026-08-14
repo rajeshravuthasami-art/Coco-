@@ -1,0 +1,13 @@
+{
+  "name": "coco-premium-ui",
+  "version": "1.0.0",
+  "description": "Premium glassmorphism UI for Coco AI assistant built by RTSR Pvt Ltd",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "private": true
+}
