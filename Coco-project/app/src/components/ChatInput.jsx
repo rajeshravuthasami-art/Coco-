@@ -1,17 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn } from '../lib/utils.js';
 
-interface ChatInputProps {
-  onSend: (message: string) => void;
-  isLoading: boolean;
-  lengthPref: 'short' | 'medium' | 'long';
-  setLengthPref: (pref: 'short' | 'medium' | 'long') => void;
-}
-
-export function ChatInput({ onSend, isLoading, lengthPref, setLengthPref }: ChatInputProps) {
+export function ChatInput({ onSend, isLoading, lengthPref, setLengthPref }) {
   const [input, setInput] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -20,14 +13,14 @@ export function ChatInput({ onSend, isLoading, lengthPref, setLengthPref }: Chat
     }
   }, [input]);
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e?.preventDefault();
     if (!input.trim() || isLoading) return;
     onSend(input);
     setInput('');
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
@@ -37,7 +30,7 @@ export function ChatInput({ onSend, isLoading, lengthPref, setLengthPref }: Chat
   return (
     <div className="relative w-full max-w-4xl mx-auto p-4">
       <div className="absolute -top-12 left-4 flex gap-2 glass-panel py-1 px-2 rounded-full mb-2 text-xs font-medium">
-        {(['short', 'medium', 'long'] as const).map((len) => (
+        {['short', 'medium', 'long'].map((len) => (
           <button
             key={len}
             onClick={() => setLengthPref(len)}

@@ -7,12 +7,7 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const generateChatResponse = async (
-    messages: { role: 'user' | 'assistant' | 'system', content: string }[],
-    lengthPreference: 'short' | 'medium' | 'long',
-    language: string
-) => {
-
+export const generateChatResponse = async (messages, lengthPreference, language) => {
     let lengthInstruction = '';
     switch (lengthPreference) {
         case 'short':
@@ -36,12 +31,12 @@ ${languageInstruction}
 ${lengthInstruction}`;
 
     const formattedMessages = [
-        { role: 'system', content: systemPrompt } as const,
+        { role: 'system', content: systemPrompt },
         ...messages
     ];
 
     const stream = await openai.chat.completions.create({
-        model: 'gpt-4o', // Using a current valid model identifier instead of gpt-5.6
+        model: 'gpt-4o', // Using a current valid model identifier
         messages: formattedMessages,
         stream: true,
     });

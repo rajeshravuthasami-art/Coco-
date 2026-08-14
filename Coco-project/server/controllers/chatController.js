@@ -1,7 +1,6 @@
-import { Request, Response } from 'express';
-import { generateChatResponse } from '../services/aiService';
+import { generateChatResponse } from '../services/aiService.js';
 
-export const handleChat = async (req: Request, res: Response) => {
+export const handleChat = async (req, res) => {
     try {
         const { messages, lengthPreference = 'medium', language = 'auto' } = req.body;
 
@@ -25,7 +24,7 @@ export const handleChat = async (req: Request, res: Response) => {
 
         res.write('data: [DONE]\n\n');
         res.end();
-    } catch (error: any) {
+    } catch (error) {
         console.error('Chat error:', error);
         res.write(`data: ${JSON.stringify({ error: error.message || 'An error occurred during chat generation.' })}\n\n`);
         res.end();

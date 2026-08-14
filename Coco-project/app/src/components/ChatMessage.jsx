@@ -1,17 +1,9 @@
 import { User, Bot, Copy, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { cn } from '../lib/utils';
+import { cn } from '../lib/utils.js';
 
-interface ChatMessageProps {
-  role: 'user' | 'assistant';
-  content: string;
-  onCopy: (content: string) => void;
-  onRegenerate?: () => void;
-  isStreaming?: boolean;
-}
-
-export function ChatMessage({ role, content, onCopy, onRegenerate, isStreaming }: ChatMessageProps) {
+export function ChatMessage({ role, content, onCopy, onRegenerate, isStreaming }) {
   const isUser = role === 'user';
 
   return (

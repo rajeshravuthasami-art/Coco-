@@ -1,7 +1,7 @@
 import { Plus, MessageSquare, Settings } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn } from '../lib/utils.js';
 
-export function Sidebar({ isOpen, onNewChat }: { isOpen: boolean, onNewChat: () => void }) {
+export function Sidebar({ isOpen, onNewChat }) {
   return (
     <div className={cn("glass-panel h-screen flex flex-col transition-all duration-300 z-10 rounded-r-2xl border-l-0", isOpen ? "w-64" : "w-0 overflow-hidden opacity-0")}>
       <div className="p-4">
@@ -16,7 +16,6 @@ export function Sidebar({ isOpen, onNewChat }: { isOpen: boolean, onNewChat: () 
 
       <div className="flex-1 overflow-y-auto px-2 py-4 space-y-2">
         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">Recent</div>
-        {/* Placeholder for history */}
         <button className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-white/5 transition-colors text-left text-sm text-gray-700 dark:text-gray-300">
           <MessageSquare size={16} />
           <span className="truncate">What is Glassmorphism?</span>
