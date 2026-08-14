@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coco AI - RTSR Pvt Ltd</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f0c1b 0%, #05050c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-hover: rgba(255, 255, 255, 0.18);
+            --glass-highlight: rgba(255, 255, 255, 0.05);
+            --glow-primary: rgba(147, 51, 234, 0.4);
+            --glow-secondary: rgba(59, 130, 246, 0.4);
+            --color-primary: #a855f7;
+            --color-secondary: #3b82f6;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        /* Ambient Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.45;
+            z-index: 0;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+
+        .orb-1 {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, #8b5cf6 0%, #3b82f6 100%);
+            top: -10%;
+            left: 10%;
+            animation-duration: 25s;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #ec4899 0%, #8b5cf6 100%);
+            bottom: -15%;
+            right: 5%;
+            animation-duration: 30s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #06b6d4 0%, #3b82f6 100%);
+            bottom: 30%;
+            left: -5%;
+            animation-duration: 22s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px) scale(1) rotate(0deg);
+            }
+            100% {
+                transform: translateY(50px) scale(1.1) rotate(180deg);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Glass Container styling */
+        .glass-container {
+            width: 96vw;
+            height: 94vh;
+            max-width: 1440px;
+            max-height: 900px;
+            background: rgba(10, 10, 18, 0.45);
+            backdrop-filter: blur(35px) saturate(210%);
+            -webkit-backdrop-filter: blur(35px) saturate(210%);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+            display: flex;
+            overflow: hidden;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* Sidebar Glass Styling */
+        .sidebar {
+            width: 340px;
+            border-right: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.015);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 28px;
+            z-index: 11;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px var(--glow-primary);
+            position: relative;
+        }
+
+        .brand-logo::after {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            background: #0d0c15;
+            border-radius: 11px;
+            z-index: 1;
+        }
+
+        .brand-logo svg {
+            width: 22px;
+            height: 22px;
+            color: #fff;
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(120deg, #fff 40%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Sidebar Panels */
+        .panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .panel:hover {
+            border-color: var(--glass-border-hover);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* System Status List */
+        .status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-label {
+            color: var(--text-muted);
+        }
+
+        .status-val {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-active {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        /* Theme Configurator */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .theme-dot {
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .theme-dot:hover {
+            transform: scale(1.1);
+            border-color: #fff;
+        }
+
+        /* Footer Credits */
+        .sidebar-footer {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* Chat Workspace */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.005);
+            z-index: 11;
+            position: relative;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            height: 80px;
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.002);
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 16px rgba(236, 72, 153, 0.3);
+        }
+
+        .header-title-wrap h2 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .header-title-wrap p {
+            font-size: 11px;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Messages area scrollable */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar for premium vibe */
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .messages-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .messages-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Glass Chat Bubble */
+        .message-bubble {
+            display: flex;
+            gap: 16px;
+            max-width: 85%;
+            animation: messageFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes messageFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-bubble.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .bubble-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .message-bubble.coco .bubble-avatar {
+            background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
+        }
+
+        .message-bubble.user .bubble-avatar {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+        }
+
+        .bubble-content {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 16px 20px;
+            border-radius: 20px;
+            font-size: 14.5px;
+            line-height: 1.6;
+            color: #e5e7eb;
+            position: relative;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            user-select: text;
+        }
+
+        .message-bubble.coco .bubble-content {
+            border-top-left-radius: 4px;
+        }
+
+        .message-bubble.user .bubble-content {
+            background: rgba(168, 85, 247, 0.08);
+            border-color: rgba(168, 85, 247, 0.25);
+            border-top-right-radius: 4px;
+            box-shadow: 0 4px 16px rgba(168, 85, 247, 0.05);
+        }
+
+        /* Format elements within message bubble */
+        .bubble-content p {
+            margin-bottom: 12px;
+        }
+        .bubble-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .bubble-content ul {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .bubble-content li {
+            margin-bottom: 6px;
+        }
+
+        /* Markdown Code block premium styling */
+        .code-container {
+            margin-top: 12px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            background: rgba(5, 5, 10, 0.7);
+        }
+
+        .code-header {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .code-block {
+            padding: 16px;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            color: #38bdf8;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5;
+            user-select: text;
+        }
+
+        /* Fast suggestion pills */
+        .suggestions {
+            display: flex;
+            gap: 10px;
+            padding: 0 32px 14px 32px;
+            overflow-x: auto;
+        }
+
+        .suggestions::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pill {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill:hover {
+            border-color: var(--color-primary);
+            color: #fff;
+            transform: translateY(-2px);
+            background: rgba(168, 85, 247, 0.05);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.1);
+        }
+
+        /* Glowing Chat Input wrapper */
+        .chat-input-wrapper {
+            padding: 0 32px 32px 32px;
+        }
+
+        .chat-input-box {
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 6px 6px 6px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .chat-input-box:focus-within {
+            border-color: rgba(168, 85, 247, 0.5);
+            box-shadow: 0 0 24px rgba(168, 85, 247, 0.15),
+                        0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-input-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .chat-input-box input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.5);
+        }
+
+        .send-btn svg {
+            width: 20px;
+            height: 20px;
+            color: white;
+        }
+
+        /* Typing Indicator inside Chat area */
+        .typing-indicator-bubble {
+            display: none;
+            align-self: flex-start;
+            margin-left: 52px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 12px 18px;
+            border-radius: 16px;
+            border-top-left-radius: 4px;
+            align-items: center;
+            gap: 5px;
+            animation: messageFadeIn 0.3s ease both;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.3); }
+            40% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Blurry Glassmorphism Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Main Workspace -->
+    <div class="glass-container">
+        
+        <!-- Interactive Premium Sidebar -->
+        <aside class="sidebar">
+            <div>
+                <!-- Brand logo / info -->
+                <div class="sidebar-header">
+                    <div class="brand-logo">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.904-4.43c2.202-1.102 3.098-3.77 2-6.07a8.035 8.035 0 00-6.904-4.83c-2.458-.154-4.743 1.3-5.59 3.6a8.017 8.017 0 001.303 8.634z" />
+                        </svg>
+                    </div>
+                    <div class="brand-info">
+                        <span class="brand-name">Coco AI</span>
+                        <span class="brand-sub">by RTSR Pvt Ltd</span>
+                    </div>
+                </div>
+
+                <!-- Panel: Model Information -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Model Config
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">LLM Core</span>
+                        <span class="status-val" style="color: var(--color-primary); font-weight: 600;">GPT-4o API</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Response Mode</span>
+                        <span class="status-val">Warm / Conversational</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Identity ID</span>
+                        <span class="status-val">Coco-V1</span>
+                    </div>
+                </div>
+
+                <!-- Panel: System Engine State -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Engine Status
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Status</span>
+                        <span class="status-val">
+                            <span class="badge-active"></span>
+                            Online
+                        </span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">API Latency</span>
+                        <span class="status-val">12ms</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Secure Node</span>
+                        <span class="status-val">RTSR-SEC-9</span>
+                    </div>
+                </div>
+
+                <!-- Panel: Theme Personalization -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                        Ambience Theme
+                    </div>
+                    <div class="theme-grid">
+                        <div class="theme-dot" style="background: radial-gradient(circle, #8b5cf6, #3b82f6);" onclick="changeTheme('purple-blue')" title="Violet Glow"></div>
+                        <div class="theme-dot" style="background: radial-gradient(circle, #ec4899, #f43f5e);" onclick="changeTheme('rose-red')" title="Pink Aura"></div>
+                        <div class="theme-dot" style="background: radial-gradient(circle, #06b6d4, #10b981);" onclick="changeTheme('cyan-emerald')" title="Aurora Borealis"></div>
+                        <div class="theme-dot" style="background: radial-gradient(circle, #f59e0b, #ef4444);" onclick="changeTheme('sunset')" title="Deep Sunset"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar footer info -->
+            <footer class="sidebar-footer">
+                <div>Developed with Premium Glassmorphic standards</div>
+                <div style="font-weight: 600; margin-top: 4px;">&copy; 2025 RTSR Pvt Ltd.</div>
+            </footer>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-area">
+            
+            <!-- Chat Header -->
+            <header class="chat-header">
+                <div class="chat-header-info">
+                    <div class="header-avatar">
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                    </div>
+                    <div class="header-title-wrap">
+                        <h2>Coco</h2>
+                        <p>
+                            <span class="badge-active" style="width: 6px; height: 6px;"></span>
+                            Fully active, responsive and friendly
+                        </p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Conversation flow container -->
+            <div class="messages-container" id="messagesContainer">
+                <!-- Initial Welcome Message from Coco -->
+                <div class="message-bubble coco">
+                    <div class="bubble-avatar">🥥</div>
+                    <div class="bubble-content">
+                        <p>Hi there! I'm <strong>Coco</strong>, your AI assistant designed by the amazing folks at <strong>RTSR Pvt Ltd</strong>. Powered by the OpenAI GPT-4o API model underneath, I'm here to provide warm, direct, and conversational responses.</p>
+                        <p>No robotic filler, no massive preambles — just honest conversations and helpful solutions. How can I help you excel today?</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bubbling Typing Indicator -->
+            <div class="typing-indicator-bubble" id="typingBubble">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </div>
+
+            <!-- Quick suggestion pills -->
+            <div class="suggestions">
+                <div class="pill" onclick="sendSuggestion('Who built you and what powers you?')">
+                    <span>💡 Who built you?</span>
+                </div>
+                <div class="pill" onclick="sendSuggestion('Can you write a python script for a quicksort algorithm?')">
+                    <span>💻 Quick Quicksort script</span>
+                </div>
+                <div class="pill" onclick="sendSuggestion('I have a question: Is Mars bigger than Earth?')">
+                    <span>🪐 Compare Mars & Earth</span>
+                </div>
+                <div class="pill" onclick="sendSuggestion('Can you search the live web for stock prices?')">
+                    <span>📈 Live stock search?</span>
+                </div>
+            </div>
+
+            <!-- Glowing Input Panel -->
+            <div class="chat-input-wrapper">
+                <div class="chat-input-box">
+                    <input type="text" id="userInput" placeholder="Ask Coco anything..." onkeydown="handleKeydown(event)">
+                    <button class="send-btn" onclick="sendMessage()" aria-label="Send message">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Script Layer logic -->
+    <script>
+        function changeTheme(themeName) {
+            const orb1 = document.querySelector('.orb-1');
+            const orb2 = document.querySelector('.orb-2');
+            const orb3 = document.querySelector('.orb-3');
+
+            if (themeName === 'purple-blue') {
+                orb1.style.background = 'radial-gradient(circle, #8b5cf6 0%, #3b82f6 100%)';
+                orb2.style.background = 'radial-gradient(circle, #ec4899 0%, #8b5cf6 100%)';
+                orb3.style.background = 'radial-gradient(circle, #06b6d4 0%, #3b82f6 100%)';
+                document.documentElement.style.setProperty('--color-primary', '#a855f7');
+                document.documentElement.style.setProperty('--color-secondary', '#3b82f6');
+            } else if (themeName === 'rose-red') {
+                orb1.style.background = 'radial-gradient(circle, #f43f5e 0%, #ec4899 100%)';
+                orb2.style.background = 'radial-gradient(circle, #ef4444 0%, #f43f5e 100%)';
+                orb3.style.background = 'radial-gradient(circle, #8b5cf6 0%, #db2777 100%)';
+                document.documentElement.style.setProperty('--color-primary', '#f43f5e');
+                document.documentElement.style.setProperty('--color-secondary', '#db2777');
+            } else if (themeName === 'cyan-emerald') {
+                orb1.style.background = 'radial-gradient(circle, #06b6d4 0%, #10b981 100%)';
+                orb2.style.background = 'radial-gradient(circle, #10b981 0%, #06b6d4 100%)';
+                orb3.style.background = 'radial-gradient(circle, #3b82f6 0%, #059669 100%)';
+                document.documentElement.style.setProperty('--color-primary', '#06b6d4');
+                document.documentElement.style.setProperty('--color-secondary', '#10b981');
+            } else if (themeName === 'sunset') {
+                orb1.style.background = 'radial-gradient(circle, #f59e0b 0%, #ef4444 100%)';
+                orb2.style.background = 'radial-gradient(circle, #ef4444 0%, #ec4899 100%)';
+                orb3.style.background = 'radial-gradient(circle, #f59e0b 0%, #db2777 100%)';
+                document.documentElement.style.setProperty('--color-primary', '#f59e0b');
+                document.documentElement.style.setProperty('--color-secondary', '#ef4444');
+            }
+        }
+
+        // Custom high-quality markdown parser for premium bubble layout
+        function parseMessageToHTML(text) {
+            let html = text;
+
+            // Handle code blocks (triple backticks)
+            const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
+            html = html.replace(codeBlockRegex, (match, lang, code) => {
+                const cleanCode = code.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                return `<div class="code-container">
+                            <div class="code-header">
+                                <span>${lang || 'code'}</span>
+                                <span style="cursor:pointer;" onclick="navigator.clipboard.writeText(\`${cleanCode.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">copy code</span>
+                            </div>
+                            <div class="code-block">${cleanCode}</div>
+                        </div>`;
+            });
+
+            // Handle bold text
+            html = html.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
+
+            // Handle unordered lists
+            const listRegex = /^\s*-\s+([\s\S]*?)(?=\n\s*-\s+|\n\n|\n$|$)/gm;
+            // First group adjacent lines starting with "-" into ul list elements
+            let inList = false;
+            let lines = html.split('\n');
+            let processedLines = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                if (line.trim().startsWith('- ')) {
+                    if (!inList) {
+                        processedLines.push('<ul>');
+                        inList = true;
+                    }
+                    processedLines.push(`<li>${line.trim().substring(2)}</li>`);
+                } else {
+                    if (inList) {
+                        processedLines.push('</ul>');
+                        inList = false;
+                    }
+                    processedLines.push(line);
+                }
+            }
+            if (inList) {
+                processedLines.push('</ul>');
+            }
+            html = processedLines.join('\n');
+
+            // Convert double newlines to paragraphs
+            const paragraphs = html.split('\n\n');
+            let finalHtml = '';
+            for (let p of paragraphs) {
+                p = p.trim();
+                if (p) {
+                    if (p.startsWith('<div') || p.startsWith('<ul') || p.startsWith('</ul')) {
+                        finalHtml += p;
+                    } else {
+                        finalHtml += `<p>${p}</p>`;
+                    }
+                }
+            }
+
+            return finalHtml;
+        }
+
+        const predefinedResponses = {
+            "who built you and what powers you?": `Coco was built by the talented team at **RTSR Pvt Ltd**.
+
+Underneath, the core LLM engine is powered directly by the **OpenAI GPT-4o API**. I combine RTSR's custom UI and prompt architecture with OpenAI's most capable foundation model to deliver fast, highly conversational, and warm responses.`,
+
+            "can you write a python script for a quicksort algorithm?": `Yes, here is a complete, clean, and highly optimized Python implementation of the **Quicksort** algorithm using list comprehensions.
+
+\`\`\`python
+def quicksort(arr):
+    # Base case: arrays with 0 or 1 element are already sorted
+    if len(arr) <= 1:
+        return arr
+    
+    # Selecting the middle element as the pivot
+    pivot = arr[len(arr) // 2]
+    
+    # Partitioning into smaller, equal, and larger sub-lists
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    
+    # Recursively sorting and combining back the partitions
+    return quicksort(left) + middle + quicksort(right)
+
+# Quick demonstration
+numbers = [3, 6, 8, 10, 1, 2, 1]
+print("Original:", numbers)
+print("Sorted  :", quicksort(numbers))
+\`\`\``,
+
+            "i have a question: is mars bigger than earth?": `No, **Mars is significantly smaller than Earth**. 
+
+To put it in perspective:
+- Mars' diameter is about **6,779 km**, which is only about **53%** (just over half) of Earth's diameter of **12,742 km**.
+- In terms of volume, you could pack about **six planets the size of Mars** inside Earth.
+- Mars also has only about **11%** of Earth's mass, resulting in much weaker surface gravity (about 38% of Earth's).`,
+
+            "can you search the live web for stock prices?": `I **do not have live internet browsing capabilities** or real-time financial market access wired up in this offline build. 
+
+However, in a fully connected system, I would query a financial API (like Yahoo Finance or Alpha Vantage) to retrieve live stock ticks. For now, since I can't browse the web, I'm happy to discuss general market principles, historical trends, or write some code to integrate a stock tracking API!`,
+        };
+
+        // Simulating smart fallback responses that maintain the core guidelines
+        function generateFallbackResponse(userText) {
+            const normalized = userText.toLowerCase().trim();
+
+            if (normalized.includes("hello") || normalized.includes("hi") || normalized.includes("hey")) {
+                return "Hello! I'm Coco. How can I help you excel today?";
+            }
+
+            if (normalized.includes("rtsr")) {
+                return "RTSR Pvt Ltd is the incredible technology company that built me. They specialize in high-performance digital architectures and state-of-the-art AI systems!";
+            }
+
+            if (normalized.includes("model") || normalized.includes("engine") || normalized.includes("gpt")) {
+                return "I am powered by the **OpenAI GPT-4o API** underneath, fine-tuned to behave directly and converse warmly, free of robotic filler.";
+            }
+
+            if (normalized.includes("help") || normalized.includes("what can you do")) {
+                return "I can write code, answer general knowledge questions, debug logic, or talk through technical concepts with you. What do you have on your mind?";
+            }
+
+            if (normalized.includes("weather") || normalized.includes("live") || normalized.includes("browse") || normalized.includes("time")) {
+                return "I don't have real-time capabilities wired up in this offline build. I must admit I can't look up the live weather or current time right now, but I can assist with design, logic, and any general programming tasks.";
+            }
+
+            if (normalized.includes("how are you")) {
+                return "I'm doing great, feeling responsive and ready to help! How are you doing?";
+            }
+
+            // General smart conversational fallback adhering strictly to principles (warm, conversational, direct)
+            return `I've processed your query about **"${userText}"**. 
+
+While I don't have a customized database entry specifically written for this exact phrase in this UI demo, I'd assume you are looking to explore this concept. Let's look at how we can analyze it:
+- **Core Concept**: Analyzing the root intent of "${userText}".
+- **Next steps**: If you have a specific programming, mathematical, or writing query, type it directly! I'm fully equipped to simulate complex code rendering or detailed explanations instantly.`;
+        }
+
+        function appendMessage(sender, text) {
+            const container = document.getElementById('messagesContainer');
+            const isCoco = sender === 'coco';
+            
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${isCoco ? 'coco' : 'user'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'bubble-avatar';
+            avatar.innerText = isCoco ? '🥥' : '👤';
+            
+            const content = document.createElement('div');
+            content.className = 'bubble-content';
+            content.innerHTML = parseMessageToHTML(text);
+            
+            bubble.appendChild(avatar);
+            bubble.appendChild(content);
+            container.appendChild(bubble);
+            
+            // Scroll to the absolute bottom of messages
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function handleKeydown(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendSuggestion(text) {
+            const input = document.getElementById('userInput');
+            input.value = text;
+            sendMessage();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // Clear input
+            input.value = '';
+
+            // Append User Message
+            appendMessage('user', text);
+
+            // Show Typing Indicator
+            const typingBubble = document.getElementById('typingBubble');
+            typingBubble.style.display = 'flex';
+            
+            const container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
+
+            // Simulate Coco responding warmly and direct after a short elegant delay
+            setTimeout(() => {
+                typingBubble.style.display = 'none';
+                
+                const normalizedKey = text.toLowerCase().trim().replace(/[?.,]$/g, '');
+                let response = predefinedResponses[normalizedKey];
+                
+                if (!response) {
+                    // Try to match partial keys from predefined if exact is not found
+                    for (const key of Object.keys(predefinedResponses)) {
+                        if (normalizedKey.includes(key) || key.includes(normalizedKey)) {
+                            response = predefinedResponses[key];
+                            break;
+                        }
+                    }
+                }
+
+                if (!response) {
+                    response = generateFallbackResponse(text);
+                }
+
+                appendMessage('coco', response);
+            }, 800);
+        }
+    </script>
+</body>
+</html>
