@@ -2,16 +2,34 @@ import { useState, useRef, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar.jsx';
 import { ChatMessage } from './components/ChatMessage.jsx';
 import { ChatInput } from './components/ChatInput.jsx';
-import { Menu, X, Moon, Sun } from 'lucide-react';
+import Auth from './components/Auth.jsx';
+import { Menu, X, Moon, Sun, LogOut } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from './lib/supabaseClient';
 
 export default function App() {
+  const [session, setSession] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lengthPref, setLengthPref] = useState('medium');
+  const [currentSessionId, setCurrentSessionId] = useState(null);
   const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (!session) {
+        setMessages([]);
+        setCurrentSessionId(null);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (darkMode) {
@@ -25,14 +43,73 @@ export default function App() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  const handleSelectSession = async (sessionId) => {
+    setCurrentSessionId(sessionId);
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data.map(m => ({ id: m.id, role: m.role, content: m.content })));
+    } catch (error) {
+      console.error("Failed to fetch messages for session", error);
+    }
+  };
+
+  const createOrGetSessionId = async (firstMessageContent) => {
+    if (currentSessionId) return currentSessionId;
+
+    try {
+      const title = firstMessageContent.substring(0, 30) + (firstMessageContent.length > 30 ? '...' : '');
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .insert([{ user_id: session.user.id, title }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      setCurrentSessionId(data.id);
+      return data.id;
+    } catch (error) {
+      console.error("Failed to create session", error);
+      return null;
+    }
+  };
+
+  const saveMessageToSupabase = async (sessionId, role, content) => {
+    if (!sessionId) return;
+    try {
+      await supabase.from('messages').insert([{
+        session_id: sessionId,
+        role,
+        content
+      }]);
+    } catch (error) {
+      console.error("Failed to save message", error);
+    }
+  };
+
   const handleSend = async (content) => {
-    const userMessage = { id: uuidv4(), role: 'user', content };
+    const userMessageId = uuidv4();
+    const userMessage = { id: userMessageId, role: 'user', content };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setIsLoading(true);
 
+    const activeSessionId = await createOrGetSessionId(content);
+    await saveMessageToSupabase(activeSessionId, 'user', content);
+
     const assistantMessageId = uuidv4();
     setMessages((prev) => [...prev, { id: assistantMessageId, role: 'assistant', content: '' }]);
+
+    let fullAssistantResponse = '';
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -62,6 +139,7 @@ export default function App() {
               try {
                 const data = JSON.parse(line.slice(6));
                 if (data.content) {
+                  fullAssistantResponse += data.content;
                   setMessages((prev) => prev.map((m) =>
                     m.id === assistantMessageId ? { ...m, content: m.content + data.content } : m
                   ));
@@ -76,6 +154,10 @@ export default function App() {
             }
           }
         }
+      }
+
+      if (fullAssistantResponse) {
+        await saveMessageToSupabase(activeSessionId, 'assistant', fullAssistantResponse);
       }
     } catch (error) {
       console.error('Chat error:', error);
@@ -93,7 +175,12 @@ export default function App() {
 
   const handleNewChat = () => {
     setMessages([]);
+    setCurrentSessionId(null);
   };
+
+  if (!session) {
+    return <Auth onAuthSuccess={() => {}} />;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden text-gray-900 dark:text-gray-100 transition-colors duration-300 relative">
@@ -115,7 +202,13 @@ export default function App() {
         </button>
       )}
 
-      <Sidebar isOpen={sidebarOpen} onNewChat={handleNewChat} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        onNewChat={handleNewChat}
+        session={session}
+        onSelectSession={handleSelectSession}
+        currentSessionId={currentSessionId}
+      />
 
       <div className="flex-1 flex flex-col h-full relative w-full max-w-full">
         <div className="absolute top-4 right-4 z-50 flex gap-2">
@@ -124,6 +217,13 @@ export default function App() {
             className="p-2 glass-panel rounded-full hover:bg-white/20 transition-colors"
           >
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button
+            onClick={handleLogout}
+            className="p-2 glass-panel rounded-full hover:bg-white/20 transition-colors text-red-400 hover:text-red-300"
+            title="Logout"
+          >
+            <LogOut size={20} />
           </button>
         </div>
 

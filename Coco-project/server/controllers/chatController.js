@@ -16,9 +16,11 @@ export const handleChat = async (req, res) => {
         const stream = await generateChatResponse(messages, lengthPreference, language);
 
         for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || '';
-            if (content) {
-                res.write(`data: ${JSON.stringify({ content })}\n\n`);
+            if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+                const content = chunk.delta.text;
+                if (content) {
+                    res.write(`data: ${JSON.stringify({ content })}\n\n`);
+                }
             }
         }
 
