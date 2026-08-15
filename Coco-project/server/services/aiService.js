@@ -1,10 +1,10 @@
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+const anthropic = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 export const generateChatResponse = async (messages, lengthPreference, language) => {
@@ -22,7 +22,7 @@ export const generateChatResponse = async (messages, lengthPreference, language)
             break;
     }
 
-    const languageInstruction = language !== 'auto' ? `Respond in ${language}. ` : 'Automatically detect the user\'s language and respond in that same language. Support English, Tamil, Hindi, Telugu, Malayalam, Kannada, Bengali, and others.';
+    const languageInstruction = language !== 'auto' ? `Respond in ${language}. ` : 'Respond in whatever language the user writes in.';
 
     const systemPrompt = `You are Coco, a helpful, intelligent, and premium AI assistant.
 You answer questions on any topic including education, coding, business, travel, health information (non-diagnostic), shopping recommendations, writing, translation, and everyday conversations.
@@ -30,13 +30,16 @@ For product or shopping questions, provide concise comparisons, recommendations,
 ${languageInstruction}
 ${lengthInstruction}`;
 
-    const formattedMessages = [
-        { role: 'system', content: systemPrompt },
-        ...messages
-    ];
+    // Ensure we only pass user/assistant roles to Anthropic
+    const formattedMessages = messages.filter(m => m.role === 'user' || m.role === 'assistant').map(m => ({
+        role: m.role,
+        content: m.content
+    }));
 
-    const stream = await openai.chat.completions.create({
-        model: 'gpt-4o', // Using a current valid model identifier
+    const stream = await anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 4096,
+        system: systemPrompt,
         messages: formattedMessages,
         stream: true,
     });

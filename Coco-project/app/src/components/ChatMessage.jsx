@@ -1,6 +1,8 @@
 import { User, Bot, Copy, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { cn } from '../lib/utils.js';
 
 export function ChatMessage({ role, content, onCopy, onRegenerate, isStreaming }) {
@@ -32,8 +34,29 @@ export function ChatMessage({ role, content, onCopy, onRegenerate, isStreaming }
           </div>
         </div>
 
-        <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/10 prose-pre:backdrop-blur-md">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code({_node, inline, className, children, ...props}) {
+                const match = /language-(\w+)/.exec(className || '')
+                return !inline && match ? (
+                  <SyntaxHighlighter
+                    {...props}
+                    children={String(children).replace(/\n$/, '')}
+                    style={vscDarkPlus}
+                    language={match[1]}
+                    PreTag="div"
+                    className="rounded-md"
+                  />
+                ) : (
+                  <code {...props} className={`${className} bg-black/20 px-1 py-0.5 rounded text-sm`}>
+                    {children}
+                  </code>
+                )
+              }
+            }}
+          >
             {content || (isStreaming ? '...' : '')}
           </ReactMarkdown>
           {isStreaming && <span className="inline-block w-2 h-4 bg-indigo-500 animate-pulse ml-1 align-middle"></span>}

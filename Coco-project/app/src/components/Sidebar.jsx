@@ -1,7 +1,32 @@
 import { Plus, MessageSquare, Settings } from 'lucide-react';
 import { cn } from '../lib/utils.js';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
-export function Sidebar({ isOpen, onNewChat }) {
+export function Sidebar({ isOpen, onNewChat, onSelectSession, currentSessionId, session }) {
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchHistory();
+    }
+  }, [session, currentSessionId]); // Re-fetch when session changes or a new chat session is potentially created
+
+  const fetchHistory = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .select('id, title, updated_at')
+        .eq('user_id', session.user.id)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      setHistory(data || []);
+    } catch (error) {
+      console.error('Error fetching chat history:', error);
+    }
+  };
+
   return (
     <div className={cn("glass-panel h-screen flex flex-col transition-all duration-300 z-10 rounded-r-2xl border-l-0", isOpen ? "w-64" : "w-0 overflow-hidden opacity-0")}>
       <div className="p-4">
@@ -16,10 +41,18 @@ export function Sidebar({ isOpen, onNewChat }) {
 
       <div className="flex-1 overflow-y-auto px-2 py-4 space-y-2">
         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">Recent</div>
-        <button className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-white/5 transition-colors text-left text-sm text-gray-700 dark:text-gray-300">
-          <MessageSquare size={16} />
-          <span className="truncate">What is Glassmorphism?</span>
-        </button>
+        {history.map((chat) => (
+          <button
+            key={chat.id}
+            onClick={() => onSelectSession(chat.id)}
+            className={cn("w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-white/5 transition-colors text-left text-sm",
+              currentSessionId === chat.id ? "bg-white/10 dark:bg-white/10 text-gray-900 dark:text-gray-100 font-medium" : "text-gray-700 dark:text-gray-300"
+            )}
+          >
+            <MessageSquare size={16} />
+            <span className="truncate">{chat.title || 'New Chat'}</span>
+          </button>
+        ))}
       </div>
 
       <div className="p-4 border-t border-white/10">
